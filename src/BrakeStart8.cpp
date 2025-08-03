@@ -387,7 +387,7 @@ HRESULT CBrakeStart8::OnProcessStart(short *buffer,int pos,int nb)
 			NewPos = pos + n;
 			NewNb = nb - n;
 
-			hr = GetSongBuffer(NewPos, NewNb, &samples); // on recupere 2*NewNb samples à partir de NewPos
+			hr = GetSongBuffer(NewPos, NewNb, &samples); // on recupere 2*NewNb samples Ã  partir de NewPos
 		    if(hr!=S_OK) return S_FALSE;
 
 			short *dst = buffer + 2 * n;
@@ -431,7 +431,7 @@ HRESULT CBrakeStart8::OnProcessStop(short *buffer, int pos,int nb)
 
 	EndPos = m_StartPos + length; // Position of the end of the effect
 
-	if(pos < m_StartPos) // Avant le début de l'effet
+	if(pos < m_StartPos) // Avant le dÃ©but de l'effet
 	{
 		hr = GetSongBuffer(pos,nb,&samples); // on recupere 2*nb samples (nb left, nb right)
 		if(hr!=S_OK) return S_FALSE;
