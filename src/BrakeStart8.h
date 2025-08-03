@@ -45,7 +45,6 @@ private:
 	double m_rampStartTime;
 	double m_rampStopTime;
 
-protected:
 	typedef enum _ID_Interface
 	{
 		ID_INIT,
@@ -62,10 +61,15 @@ protected:
 		ID_BUTTON_8
 	} ID_Interface;
 
-	#define min(a,b) (((a) < (b)) ? (a) : (b))
-	#define SQ(x)  (x * x)
 	const float MAX_TIME = 32.0f;	// slider run between 0 and 32 secondes
 
+	#define min(a,b) (((a) < (b)) ? (a) : (b))
+	#define SQ(x)  (x * x)
+
+	#ifndef SAFE_DELETE_ARRAY
+	#define SAFE_DELETE_ARRAY(x) { if (x!=nullptr) { delete [] x; x=nullptr; } }
+	#endif
 };
+
 
 #endif /* BRAKESTART8_H */
