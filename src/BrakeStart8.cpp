@@ -1,9 +1,5 @@
 #include "BrakeStart8.h"
 
-#ifndef SAFE_DELETE_ARRAY
-	#define SAFE_DELETE_ARRAY(x) { if (x!=nullptr) { delete [] x; x=nullptr; } }
-#endif
-
 //---------------------------------------------------------------------------
 CBrakeStart8::CBrakeStart8()
 {
@@ -486,3 +482,4 @@ HRESULT CBrakeStart8::OnProcessStop(short *buffer, int pos,int nb)
 
 	return S_OK;	
 }
+
