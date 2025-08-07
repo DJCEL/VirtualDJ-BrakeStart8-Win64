@@ -62,10 +62,10 @@ typedef unsigned int DWORD;
 #ifndef GUID_DEFINED
 #define GUID_DEFINED
 typedef struct _GUID {
-	unsigned long Data1;
-	unsigned short Data2;
-	unsigned short Data3;
-	unsigned char Data4[8];
+unsigned long Data1;
+unsigned short Data2;
+unsigned short Data3;
+unsigned char Data4[ 8 ];
 } GUID;
 #endif
 #elif defined(__ANDROID__)
@@ -80,19 +80,19 @@ typedef unsigned int ULONG;
 // Internal structures
 struct IVdjCallbacks8
 {
-	virtual HRESULT SendCommand(const char* command) = 0;
-	virtual HRESULT GetInfo(const char* command, double* result) = 0;
-	virtual HRESULT GetStringInfo(const char* command, void* result, int size) = 0;
-	virtual HRESULT DeclareParameter(void* parameter, int type, int id, const char* name, const char* shortName, float defaultvalue) = 0;
-	virtual HRESULT GetSongBuffer(int pos, int nb, short** buffer) = 0;
+	virtual HRESULT SendCommand(const char *command)=0;
+	virtual HRESULT GetInfo(const char *command,double *result)=0;
+	virtual HRESULT GetStringInfo(const char *command,void *result,int size)=0;
+	virtual HRESULT DeclareParameter(void *parameter,int type,int id,const char *name,const char *shortName,float defaultvalue)=0;
+	virtual HRESULT GetSongBuffer(int pos, int nb, short **buffer)=0;
 };
 
 struct IVdjVideoMouseCallbacks8
 {
-	virtual bool OnMouseMove(int x, int y, int buttons, int keyModifiers) = 0;
-	virtual bool OnMouseDown(int x, int y, int buttons, int keyModifiers) = 0;
-	virtual bool OnMouseUp(int x, int y, int buttons, int keyModifiers) = 0;
-	virtual void OnKey(const char* ch, int vkey, int modifiers, int flag, int scancode) {}
+	virtual bool OnMouseMove(int x, int y, int buttons, int keyModifiers)=0;
+	virtual bool OnMouseDown(int x, int y, int buttons, int keyModifiers)=0;
+	virtual bool OnMouseUp(int x, int y, int buttons, int keyModifiers)=0;
+	virtual void OnKey(const char *ch, int vkey, int modifiers, int flag, int scancode) {}
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -101,10 +101,10 @@ struct IVdjVideoMouseCallbacks8
 // structure used in plugin identification
 struct TVdjPluginInfo8
 {
-	const char* PluginName;
-	const char* Author;
-	const char* Description;
-	const char* Version;
+	const char *PluginName;
+	const char *Author;
+	const char *Description;
+	const char *Version;
 	VDJ_BITMAP Bitmap;
 	DWORD Flags;
 };
@@ -112,7 +112,7 @@ struct TVdjPluginInfo8
 struct TVdjPluginInfo8_Extension1
 {
 	TVdjPluginInfo8 info;
-	IVdjVideoMouseCallbacks8* mouseCallbacks;
+	IVdjVideoMouseCallbacks8 *mouseCallbacks;
 };
 
 // flags used for plugin's parameters
@@ -123,12 +123,12 @@ struct TVdjPluginInfo8_Extension1
 #define VDJPARAM_CUSTOM	4
 #define VDJPARAM_RADIO	5
 #define VDJPARAM_COMMAND 6
-#define VDJPARAM_COLORFX 7 //similar to slider, but with default position at 0.5 and only one per effect for single-knob full control
+#define VDJPARAM_COLORFX 7 //similar to slider, but with default position at 0.5 and only one per effect for single-knob full control. Use filter_selectcolorfx "myeffect"
 #define VDJPARAM_BEATS 8 //float specifying number of beats
 #define VDJPARAM_BEATS_RELATIVE 9 //int, set to +1, -1 etc to move the number of beats higher or lower when OnParameter is called
 #define VDJPARAM_POSITION 10 //used for video plugins to allow resizing/positioning by the user in the plugin's GUI
 #define VDJPARAM_RELEASEFX 11
-#define VDJPARAM_TRANSITIONFX 12
+#define VDJPARAM_TRANSITIONFX 12 // MixFX are similar to Color Fx, so a custom one will currently not show up in the list yet, and you'd have to select it by name yourself. The transition effect is applied to both decks. It will move from 1 to 0 on the deck mixing from, and from 0 to 1 on the deck mixing to
 
 #define VDJFLAG_NODOCK 0x1
 #define VDJFLAG_PROCESSAFTERSTOP 0x2 //when this flag is set, OnProcessSamples or OnDraw are called after plugin is stopped. Plugin should return E_FAIL as soon as possible to stop processing.
@@ -149,8 +149,8 @@ struct TVdjPluginInterface8
 {
 	DWORD Type;
 	// xml and image buffers if Type==VDJINTERFACE_SKIN
-	const char* Xml;
-	void* ImageBuffer;
+	const char *Xml;
+	void *ImageBuffer;
 	int ImageSize;
 	// Type==VDJINTERFACE_DIALOG. HWND returned by CreateDialog or CreateWindow on Windows, or NSWindow pointer on mac
 	VDJ_WINDOW hWnd;
@@ -165,44 +165,44 @@ class IVdjPlugin8
 {
 public:
 	// Initialization
-	virtual HRESULT VDJ_API OnLoad() { return S_OK; }
-	virtual HRESULT VDJ_API OnGetPluginInfo(TVdjPluginInfo8* info) { return E_NOTIMPL; }
-	virtual ULONG VDJ_API Release() { delete this; return S_OK; }
+	virtual HRESULT VDJ_API OnLoad() {return S_OK;}
+	virtual HRESULT VDJ_API OnGetPluginInfo(TVdjPluginInfo8 *info) {return E_NOTIMPL;}
+	virtual ULONG VDJ_API Release() {delete this; return S_OK;}
 	virtual ~IVdjPlugin8() {}
 
 	// call DeclareParameter*() for all your variables during OnLoad()
 	// if type=VDJPARAM_CUSTOM or VDJPARAM_STRING, parameterSize must be set to sizeof(*parameter)
-	HRESULT DeclareParameterButton(int* parameter, int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_BUTTON, id, name, shortName, 0); }
-	HRESULT DeclareParameterSlider(float* parameter, int id, const char* name, const char* shortName, float defaultvalue) { return cb->DeclareParameter(parameter, VDJPARAM_SLIDER, id, name, shortName, defaultvalue); }
-	HRESULT DeclareParameterSwitch(int* parameter, int id, const char* name, const char* shortName, bool defaultvalue) { return cb->DeclareParameter(parameter, VDJPARAM_SWITCH, id, name, shortName, (float)defaultvalue); }
-	HRESULT DeclareParameterString(char* parameter, int id, const char* name, const char* shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_STRING, id, name, shortName, (float)parameterSize); }
-	HRESULT DeclareParameterCustom(void* parameter, int id, const char* name, const char* shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_CUSTOM, id, name, shortName, (float)parameterSize); }
-	HRESULT DeclareParameterRadio(int* parameter, int id, const char* name, const char* shortName, float defaultvalue) { return cb->DeclareParameter(parameter, VDJPARAM_RADIO, id, name, shortName, (float)defaultvalue); }
-	HRESULT DeclareParameterCommand(char* parameter, int id, const char* name, const char* shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_COMMAND, id, name, shortName, (float)parameterSize); }
-	HRESULT DeclareParameterColorFX(float* parameter, int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_COLORFX, id, name, shortName, 0.5f); }
-	HRESULT DeclareParameterBeats(float* parameter, int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_BEATS, id, name, shortName, 0.5f); }
-	HRESULT DeclareParameterBeatsRelative(int* parameter, int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_BEATS_RELATIVE, id, name, shortName, 0.5f); }
-	HRESULT DeclareParameterPosition(float parameter[4], int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_POSITION, id, name, shortName, 4 * sizeof(float)); }
-	HRESULT DeclareParameterReleaseFX(float* parameter, int id, const char* name, const char* shortName) { return cb->DeclareParameter(parameter, VDJPARAM_RELEASEFX, id, name, shortName, 0.f); }
-	HRESULT DeclareParameterTransitionFX(float* parameter, int id) { return cb->DeclareParameter(parameter, VDJPARAM_TRANSITIONFX, id, "Transition FX", "Trans", 0.f); }
+	HRESULT DeclareParameterButton(int *parameter, int id, const char *name, const char *shortName) {return cb->DeclareParameter(parameter,VDJPARAM_BUTTON,id,name,shortName,0);}
+	HRESULT DeclareParameterSlider(float *parameter, int id, const char *name, const char *shortName, float defaultvalue) {return cb->DeclareParameter(parameter,VDJPARAM_SLIDER,id,name,shortName,defaultvalue);}
+	HRESULT DeclareParameterSwitch(int *parameter, int id, const char *name, const char *shortName, bool defaultvalue) {return cb->DeclareParameter(parameter,VDJPARAM_SWITCH,id,name,shortName,(float)defaultvalue);}
+	HRESULT DeclareParameterString(char *parameter, int id, const char *name, const char *shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_STRING, id, name, shortName, (float)parameterSize); }
+	HRESULT DeclareParameterCustom(void *parameter, int id, const char *name, const char *shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_CUSTOM, id, name, shortName, (float)parameterSize); }
+	HRESULT DeclareParameterRadio(int *parameter, int id, const char *name, const char *shortName, float defaultvalue) { return cb->DeclareParameter(parameter, VDJPARAM_RADIO, id, name, shortName, (float)defaultvalue); }
+	HRESULT DeclareParameterCommand(char *parameter, int id, const char *name, const char *shortName, int parameterSize) { return cb->DeclareParameter(parameter, VDJPARAM_COMMAND, id, name, shortName, (float)parameterSize); }
+	HRESULT DeclareParameterColorFX(float *parameter, int id, const char *name, const char *shortName) { return cb->DeclareParameter(parameter, VDJPARAM_COLORFX, id, name, shortName, 0.5f); }
+	HRESULT DeclareParameterBeats(float *parameter, int id, const char *name, const char *shortName) { return cb->DeclareParameter(parameter, VDJPARAM_BEATS, id, name, shortName, 0.5f); }
+	HRESULT DeclareParameterBeatsRelative(int *parameter, int id, const char *name, const char *shortName) { return cb->DeclareParameter(parameter, VDJPARAM_BEATS_RELATIVE, id, name, shortName, 0.5f); }
+	HRESULT DeclareParameterPosition(float parameter[4], int id, const char *name, const char *shortName) { return cb->DeclareParameter(parameter, VDJPARAM_POSITION, id, name, shortName, 4*sizeof(float)); }
+	HRESULT DeclareParameterReleaseFX(float *parameter, int id, const char *name, const char *shortName) { return cb->DeclareParameter(parameter, VDJPARAM_RELEASEFX, id, name, shortName, 0.f); }
+	HRESULT DeclareParameterTransitionFX(float *parameter, int id) { return cb->DeclareParameter(parameter, VDJPARAM_TRANSITIONFX, id, "Transition FX", "Trans", 0.f); }
 
 	// OnParameter will be called each time a parameter is changed from within VirtualDJ
-	virtual HRESULT VDJ_API OnParameter(int id) { return S_OK; }
+	virtual HRESULT VDJ_API OnParameter(int id) {return S_OK;}
 	// OnGetParameterString will be called each time the string label of a parameter is requested by VirtualDJ
-	virtual HRESULT VDJ_API OnGetParameterString(int id, char* outParam, int outParamSize) { return E_NOTIMPL; }
+	virtual HRESULT VDJ_API OnGetParameterString(int id, char *outParam, int outParamSize) {return E_NOTIMPL;}
 
 	// Custom user-interface
 	// Fill the HWND or xml/bitmap info in the passed pluginInterface structure, to define your own plugin window
-	virtual HRESULT VDJ_API OnGetUserInterface(TVdjPluginInterface8* pluginInterface) { return E_NOTIMPL; }
+	virtual HRESULT VDJ_API OnGetUserInterface(TVdjPluginInterface8 *pluginInterface) {return E_NOTIMPL;}
 	VDJ_HINSTANCE hInstance;
 
 	// send a VDJScript command to VirtualDJ
-	HRESULT SendCommand(const char* command) { return cb->SendCommand(command); }
+	HRESULT SendCommand(const char *command) {return cb->SendCommand(command);}
 	// get info from VirtualDJ (as a value, or as a utf-8 string)
-	HRESULT GetInfo(const char* command, double* result) { return cb->GetInfo(command, result); }
-	HRESULT GetStringInfo(const char* command, char* result, int size) { return cb->GetStringInfo(command, result, size); }
+	HRESULT GetInfo(const char *command, double *result) {return cb->GetInfo(command,result);}
+	HRESULT GetStringInfo(const char *command, char *result, int size) {return cb->GetStringInfo(command,result,size);}
 
-	IVdjCallbacks8* cb;
+	IVdjCallbacks8 *cb;
 };
 
 class IVdjPluginStartStop8 : public IVdjPlugin8
@@ -220,7 +220,7 @@ public:
 #define VDJCLASS8GUID_DEFINED
 static const GUID CLSID_VdjPlugin8 = { 0xED8A8D87, 0xF4F9, 0x4DCD, { 0xBD, 0x24, 0x29, 0x14, 0x12, 0xE9, 0x3B, 0x60 } };
 static const GUID IID_IVdjPluginBasic8 = { 0xa1d90ea1, 0x4d0d, 0x42dd, { 0xa4, 0xd0, 0xb8, 0xf3, 0x37, 0xb3, 0x21, 0xf1 } };
-static const GUID IID_IVdjPluginStartStop8 = { 0xa1d91ea1, 0x4e0d, 0x32dd, { 0x14, 0xd0, 0xc8, 0xf3, 0x47, 0xb6, 0x41, 0xd1 } };
+static const GUID IID_IVdjPluginStartStop8 = { 0xa1d91ea1, 0x4e0d, 0x32dd, { 0x14, 0xd0, 0xc8, 0xf3, 0x47, 0xb6, 0x41, 0xd1 }};
 #else
 extern static const GUID CLSID_VdjPlugin8;
 extern static const GUID IID_IVdjPluginBasic8;
@@ -234,7 +234,7 @@ extern static const GUID IID_IVdjPluginStartStop8;
 #ifdef __cplusplus
 extern "C" {
 #endif
-	VDJ_EXPORT HRESULT VDJ_API DllGetClassObject(const GUID& rclsid, const GUID& riid, void** ppObject);
+	VDJ_EXPORT HRESULT VDJ_API DllGetClassObject(const GUID &rclsid,const GUID &riid,void** ppObject);
 #ifdef __cplusplus
 }
 #endif
